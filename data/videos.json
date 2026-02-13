@@ -1,1 +1,10 @@
-{"creator": "pinkpennies_", "videos": [], "last_updated": "2026-02-13T16:00:00Z"}
+{
+  "creator": "pinkpennies_",
+  "videos": [
+    {
+      "id": "test-1",
+      "title": "Test Video"
+    }
+  ],
+  "last_updated": "2026-01-01"
+}
