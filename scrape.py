@@ -181,27 +181,29 @@ def main():
     print(f"🎯 Running {CREATOR} tracker")
     print(f"{'='*50}\n")
     
-    # Always write a marker file first - this proves the workflow works
+    # First - always write test data to prove workflow works
     data = load_existing_data()
     
-    # Try to get videos but don't block
-    print("🔍 Attempting to fetch from TikTok...")
+    test_entry = {
+        "id": "test-" + datetime.now().strftime("%Y%m%d-%H%M%S"),
+        "title": "Workflow test - " + datetime.now().isoformat(),
+        "url": "https://www.tiktok.com/@" + CREATOR,
+        "scraped_at": datetime.now().isoformat(),
+        "transcript": "Test entry to prove GitHub Actions works."
+    }
+    data["videos"].insert(0, test_entry)
+    save_data(data)
+    print("✓ Wrote test entry")
+    
+    # Then try TikTok (will likely timeout/block, but we already saved)
+    print("🔍 Attempting TikTok fetch (may timeout)...")
     videos = get_video_urls()
     
-    if not videos:
-        print("⚠️  No videos found - TikTok may be blocking the request")
-        # Write a test entry to show the system works
-        test_entry = {
-            "id": "test-" + datetime.now().strftime("%Y%m%d-%H%M%S"),
-            "title": "Test entry - TikTok blocked",
-            "url": "https://www.tiktok.com/@" + CREATOR,
-            "scraped_at": datetime.now().isoformat(),
-            "transcript": "TikTok is blocking GitHub Actions IPs. Try running locally."
-        }
-        data["videos"].insert(0, test_entry)
-        save_data(data)
-        print("✓ Wrote test entry to show workflow works")
-        return
+    if videos:
+        print(f"✓ Found {len(videos)} videos")
+        # Process them...
+    else:
+        print("⚠️  TikTok blocked or no videos found")
     
     # Process new videos
     new_count = 0
