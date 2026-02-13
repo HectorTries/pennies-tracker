@@ -21,11 +21,7 @@ jobs:
           pip install yt-dlp openai
           
       - name: Run scraper
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python3 test_scraper.py 2>&1
-        continue-on-error: true
+        run: python3 test_scraper.py
         
       - name: Commit results
         run: |
