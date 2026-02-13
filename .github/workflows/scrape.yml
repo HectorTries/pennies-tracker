@@ -24,7 +24,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          timeout 30 python3 scrape.py || echo "Timeout or error"
+          timeout 120 python3 scrape.py || echo "Timeout or error"
         continue-on-error: true
         
       - name: Commit results
