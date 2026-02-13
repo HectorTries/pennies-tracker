@@ -177,33 +177,43 @@ def transcribe_audio(audio_path, video_id):
         return None
 
 def main():
-    print(f"\n{'='*50}")
-    print(f"🎯 Running {CREATOR} tracker")
-    print(f"{'='*50}\n")
-    
-    # First - always write test data to prove workflow works
-    data = load_existing_data()
-    
-    test_entry = {
-        "id": "test-" + datetime.now().strftime("%Y%m%d-%H%M%S"),
-        "title": "Workflow test - " + datetime.now().isoformat(),
-        "url": "https://www.tiktok.com/@" + CREATOR,
-        "scraped_at": datetime.now().isoformat(),
-        "transcript": "Test entry to prove GitHub Actions works."
-    }
-    data["videos"].insert(0, test_entry)
-    save_data(data)
-    print("✓ Wrote test entry")
-    
-    # Then try TikTok (will likely timeout/block, but we already saved)
-    print("🔍 Attempting TikTok fetch (may timeout)...")
-    videos = get_video_urls()
-    
-    if videos:
-        print(f"✓ Found {len(videos)} videos")
-        # Process them...
-    else:
-        print("⚠️  TikTok blocked or no videos found")
+    try:
+        print(f"\n{'='*50}")
+        print(f"🎯 Running {CREATOR} tracker")
+        print(f"{'='*50}\n")
+        
+        # First - always write test data to prove workflow works
+        print("Loading existing data...")
+        data = load_existing_data()
+        
+        print("Creating test entry...")
+        test_entry = {
+            "id": "test-" + datetime.now().strftime("%Y%m%d-%H%M%S"),
+            "title": "Workflow test - " + datetime.now().isoformat(),
+            "url": "https://www.tiktok.com/@" + CREATOR,
+            "scraped_at": datetime.now().isoformat(),
+            "transcript": "Test entry to prove GitHub Actions works."
+        }
+        data["videos"].insert(0, test_entry)
+        
+        print("Saving data...")
+        save_data(data)
+        print("✓ Wrote test entry")
+        
+        # Then try TikTok (will likely timeout/block, but we already saved)
+        print("🔍 Attempting TikTok fetch (may timeout)...")
+        videos = get_video_urls()
+        
+        if videos:
+            print(f"✓ Found {len(videos)} videos")
+            # Process them...
+        else:
+            print("⚠️  TikTok blocked or no videos found")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
     
     # Process new videos
     new_count = 0
