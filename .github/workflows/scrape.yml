@@ -24,8 +24,11 @@ jobs:
         run: bash -c "python3 test.py"
         
       - name: Commit results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --local user.email "tor@openclaw.ai"
           git config --local user.name "Tor (CI)"
-          git add .
-          git status --porcelain | grep -q . && git commit -m "Update tracker - $(date '+%Y-%m-%d')" && git push || echo "No changes"
+          git add -A
+          git diff --quiet HEAD || git commit -m "Update tracker - $(date '+%Y-%m-%d')"
+          git diff --quiet HEAD || git push
