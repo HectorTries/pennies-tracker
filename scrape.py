@@ -7,8 +7,20 @@ Downloads videos, extracts audio, and transcribes.
 import json
 import os
 import subprocess
+import signal
 from datetime import datetime
 from pathlib import Path
+
+# Timeout handler
+class TimeoutError(Exception):
+    pass
+
+def timeout_handler(signum, frame):
+    raise TimeoutError("Operation timed out")
+
+# Set alarm for 45 seconds
+signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(45)
 
 # Config
 CREATOR = "pinkpennies_"
@@ -45,7 +57,8 @@ def get_video_urls():
             "--user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "--extractor-args", "tiktok:watermark=0",
             "--no-warnings",
-        ], capture_output=True, text=True, timeout=120)
+            "--socket-timeout", "30",
+        ], capture_output=True, text=True, timeout=60)
         
         if result.returncode != 0:
             print(f"⚠️  yt-dlp failed: {result.stderr}")
