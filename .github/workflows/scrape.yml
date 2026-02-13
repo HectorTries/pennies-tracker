@@ -32,6 +32,6 @@ jobs:
           git config --local user.email "tor@openclaw.ai"
           git config --local user.name "Tor (CI)"
           ls -la
-          git add -A
+          git add -A data/
           git status
           git status --porcelain | grep -q . && git commit -m "Update tracker - $(date '+%Y-%m-%d')" && git push || echo "No changes to commit"
