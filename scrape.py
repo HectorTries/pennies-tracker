@@ -42,15 +42,19 @@ def get_video_urls():
             "--flat-playlist",
             "--print", "%(id)s|%(title)s|%(duration)s|%(upload_date)s",
             f"https://www.tiktok.com/@{CREATOR}",
-        ], capture_output=True, text=True, timeout=60)
+            "--user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "--extractor-args", "tiktok:watermark=0",
+            "--no-warnings",
+        ], capture_output=True, text=True, timeout=120)
         
         if result.returncode != 0:
             print(f"⚠️  yt-dlp failed: {result.stderr}")
-            return []
+            # Try alternative method
+            return get_video_urls_alternative()
         
         videos = []
         for line in result.stdout.strip().split("\n"):
-            if line:
+            if line and "|" in line:
                 parts = line.split("|")
                 if len(parts) >= 2:
                     video_id = parts[0]
@@ -65,11 +69,46 @@ def get_video_urls():
         return videos
         
     except subprocess.TimeoutExpired:
-        print("⚠️  Request timed out")
-        return []
+        print("⚠️  Request timed out - trying alternative...")
+        return get_video_urls_alternative()
     except Exception as e:
         print(f"⚠️  Error: {e}")
         return []
+
+def get_video_urls_alternative():
+    """Try alternative method - scrape TikTok via mobile API"""
+    print("🔄 Trying alternative method...")
+    
+    # Try with mobile API
+    try:
+        result = subprocess.run([
+            "yt-dlp",
+            "--flat-playlist", 
+            "--print", "%(id)s|%(title)s",
+            "--extractor-args", "tiktok:api_url=api16-normal-c-useast2a.tiktokv.com",
+            f"https://www.tiktok.com/@{CREATOR}",
+        ], capture_output=True, text=True, timeout=60)
+        
+        if result.returncode == 0 and result.stdout.strip():
+            videos = []
+            for line in result.stdout.strip().split("\n"):
+                if line and "|" in line:
+                    parts = line.split("|")
+                    video_id = parts[0]
+                    title = parts[1] if len(parts) > 1 else "Unknown"
+                    videos.append({
+                        "id": video_id,
+                        "title": title,
+                        "url": f"https://www.tiktok.com/@{CREATOR}/video/{video_id}",
+                    })
+            if videos:
+                print(f"✓ Found {len(videos)} videos via alternative")
+                return videos
+    except Exception as e:
+        print(f"  Alternative failed: {e}")
+    
+    print("⚠️  All methods failed - TikTok is likely blocking the IP")
+    return []
 
 def download_audio(video_url, video_id):
     """Download audio from video."""
@@ -130,7 +169,7 @@ def main():
     print(f"{'='*50}\n")
     
     # Load existing data
-    data = load_existing()
+    data = load_existing_data()
     existing_ids = {v["id"] for v in data["videos"]}
     
     # Get latest videos
