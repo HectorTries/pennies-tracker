@@ -21,19 +21,23 @@ jobs:
           pip install yt-dlp openai
           
       - name: Run scraper
+        shell: bash
         run: |
           echo "Running test..."
           python3 --version
+          ls -la
           python3 test.py
+          ls -la data/
           echo "Done running"
         
       - name: Commit results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "Starting commit process"
           git config --local user.email "tor@openclaw.ai"
           git config --local user.name "Tor (CI)"
           git add -A
           git status
-          git commit -m "Update tracker - $(date '+%Y-%m-%d')" || echo "Nothing to commit"
-          git push || echo "Nothing to push"
+          git commit -m "Update from workflow" || true
+          git push origin main || true
