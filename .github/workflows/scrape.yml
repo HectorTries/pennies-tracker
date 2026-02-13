@@ -32,6 +32,4 @@ jobs:
           git config --local user.email "tor@openclaw.ai"
           git config --local user.name "Tor (CI)"
           git add -A
-          git diff --staged --quiet || git commit -m "Update tracker - $(date '+%Y-%m-%d')"
-          git push
-        continue-on-error: true
+          git status --porcelain | grep -q . && git commit -m "Update tracker - $(date '+%Y-%m-%d')" && git push || echo "No changes to commit"
