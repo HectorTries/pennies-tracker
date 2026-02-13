@@ -21,7 +21,11 @@ jobs:
           pip install yt-dlp openai
           
       - name: Run scraper
-        run: bash -c "python3 test.py"
+        run: |
+          echo "Running test..."
+          python3 --version
+          python3 test.py
+          echo "Done running"
         
       - name: Commit results
         env:
